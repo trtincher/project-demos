@@ -1,18 +1,16 @@
 name: Cleanup merged PR demos
 
-# Triggered via repository_dispatch from private repos,
-# or manually via workflow_dispatch
+# Self-cleaning: runs daily and on-demand.
+# Scans all demo folders, checks if the corresponding PR is merged,
+# and deletes demos for merged PRs. Zero per-repo setup required.
+#
+# Folder convention: {project}/pr-{N}-{slug}/
+# Repo mapping:      project-repos.json maps folder names → GitHub repos
+
 on:
-  repository_dispatch:
-    types: [pr-merged]
-  workflow_dispatch:
-    inputs:
-      project:
-        description: 'Project folder name (e.g., dndapp)'
-        required: true
-      pr_number:
-        description: 'PR number (e.g., 19)'
-        required: true
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6am UTC
+  workflow_dispatch: {}   # Manual trigger
 
 jobs:
   cleanup:
@@ -20,49 +18,77 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine demo folder
-        id: folder
+      - name: Scan and cleanup merged demos
+        env:
+          GH_TOKEN: ${{ secrets.DEMO_CLEANUP_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            PROJECT="${{ github.event.client_payload.project }}"
-            PR_NUM="${{ github.event.client_payload.pr_number }}"
-          else
-            PROJECT="${{ inputs.project }}"
-            PR_NUM="${{ inputs.pr_number }}"
+          set -e
+
+          # Load project → repo mapping
+          if [ ! -f project-repos.json ]; then
+            echo "No project-repos.json found, skipping"
+            exit 0
           fi
-          # Find the matching folder (pr-{N}-*)
-          MATCH=$(find "${PROJECT}" -maxdepth 1 -type d -name "pr-${PR_NUM}-*" | head -1)
-          echo "project=${PROJECT}" >> "$GITHUB_OUTPUT"
-          echo "pr_number=${PR_NUM}" >> "$GITHUB_OUTPUT"
-          echo "folder=${MATCH}" >> "$GITHUB_OUTPUT"
 
-      - name: Delete demo folder
-        if: steps.folder.outputs.folder != ''
-        run: |
-          echo "Removing ${{ steps.folder.outputs.folder }}"
-          rm -rf "${{ steps.folder.outputs.folder }}"
+          CLEANED=0
 
-      - name: Update root index.html
-        if: steps.folder.outputs.folder != ''
-        run: |
-          FOLDER="${{ steps.folder.outputs.folder }}"
-          # Remove the demo entry from index.html (the <div> containing the folder link)
-          python3 -c "
+          # Find all demo folders matching the pr-{N}-* pattern
+          for demo_dir in */pr-*/; do
+            [ -d "$demo_dir" ] || continue
+
+            # Extract project name and PR number from path
+            PROJECT=$(echo "$demo_dir" | cut -d'/' -f1)
+            PR_FOLDER=$(echo "$demo_dir" | cut -d'/' -f2)
+            PR_NUM=$(echo "$PR_FOLDER" | sed 's/pr-\([0-9]*\)-.*/\1/')
+
+            if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "$PR_FOLDER" ]; then
+              echo "Skipping $demo_dir — can't parse PR number"
+              continue
+            fi
+
+            # Look up the GitHub repo for this project
+            REPO=$(python3 -c "
+          import json
+          with open('project-repos.json') as f:
+              mapping = json.load(f)
+          print(mapping.get('$PROJECT', ''))
+          ")
+
+            if [ -z "$REPO" ]; then
+              echo "Skipping $demo_dir — no repo mapping for '$PROJECT'"
+              continue
+            fi
+
+            # Check if PR is merged
+            PR_STATE=$(gh pr view "$PR_NUM" --repo "$REPO" --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
+
+            if [ "$PR_STATE" = "MERGED" ]; then
+              echo "PR #$PR_NUM in $REPO is merged — removing $demo_dir"
+              rm -rf "$demo_dir"
+
+              # Remove entry from index.html
+              python3 -c "
           import re
           with open('index.html', 'r') as f:
               content = f.read()
-          # Remove the demo div that links to this folder
-          pattern = r'<div class=\"demo\">.*?href=\"' + re.escape(FOLDER) + r'/\".*?</div>'
+          pattern = r'<div class=\"demo\">.*?href=\"$(echo "$demo_dir" | sed 's/\//\\\//g')\".*?</div>'
           content = re.sub(pattern, '', content, flags=re.DOTALL)
           with open('index.html', 'w') as f:
               f.write(content)
           "
+              CLEANED=$((CLEANED + 1))
+            else
+              echo "PR #$PR_NUM in $REPO is $PR_STATE — keeping $demo_dir"
+            fi
+          done
 
-      - name: Commit and push
-        if: steps.folder.outputs.folder != ''
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "cleanup: remove demo for ${{ steps.folder.outputs.project }} PR #${{ steps.folder.outputs.pr_number }} (merged)"
-          git push
+          if [ "$CLEANED" -gt 0 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "cleanup: remove $CLEANED demo(s) for merged PRs"
+            git push
+            echo "Cleaned up $CLEANED demo(s)"
+          else
+            echo "No merged demos to clean up"
+          fi
