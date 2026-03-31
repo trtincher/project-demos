@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNDApp — Investor Demo | Full Feature Showcase</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #f0b429;
+      --accent-dim: rgba(240,180,41,0.15);
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --purple: #bc8cff;
+      --red: #f85149;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--accent), #ff6b35);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    .hero .tagline {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Stats bar */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Section styling */
+    h2 {
+      font-size: 1.5rem;
+      margin: 3rem 0 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin: 1.5rem 0 0.5rem;
+    }
+    p {
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-gold { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(240,180,41,0.3); }
+    .badge-blue { background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+    .badge-green { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+    .badge-red { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+
+    /* Feature cards */
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    .feature-card h3 { margin-top: 0; }
+
+    /* Images */
+    img {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 0.75rem 0;
+    }
+    video {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    /* Highlight list */
+    .highlights {
+      list-style: none;
+      padding: 0;
+    }
+    .highlights li {
+      padding: 0.35rem 0;
+      color: var(--text-muted);
+    }
+    .highlights li::before {
+      content: '>';
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+
+    /* Two-col layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* Divider */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* Footer */
+    .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .meta a { color: var(--blue); text-decoration: none; }
+    .meta a:hover { text-decoration: underline; }
+
+    code {
+      background: rgba(240,180,41,0.1);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- HERO -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="hero">
+    <h1>DNDApp</h1>
+    <p class="tagline">A complete D&D 5e tactical combat simulator with AI-driven enemies, full character lifecycle, DM tools, and encounter analysis — built for the browser.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-number">5,000+</div><div class="stat-label">Lines of Game Engine</div></div>
+    <div class="stat"><div class="stat-number">42</div><div class="stat-label">Spells</div></div>
+    <div class="stat"><div class="stat-number">20</div><div class="stat-label">SRD Monsters</div></div>
+    <div class="stat"><div class="stat-number">13</div><div class="stat-label">Pre-built Encounters</div></div>
+    <div class="stat"><div class="stat-number">4</div><div class="stat-label">Playable Classes</div></div>
+    <div class="stat"><div class="stat-number">18</div><div class="stat-label">Combat Conditions</div></div>
+    <div class="stat"><div class="stat-number">273+</div><div class="stat-label">Automated Tests</div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VIDEO -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Video Walkthrough</h2>
+  <video controls>
+    <source src="demo-walkthrough.webm" type="video/webm">
+    Your browser does not support webm video.
+  </video>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 1. CHARACTER CREATION -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Character Creation <span class="badge badge-gold">8-Step Wizard</span></h2>
+  <p>Full D&D 5e character creation with race, class, ability scores (Standard Array, Point Buy, or 4d6 rolls), background, equipment, and spells. Every choice reflects SRD-accurate rules and computed derived stats.</p>
+
+  <div class="feature-card">
+    <h3>Name & Race Selection</h3>
+    <p>Choose from 4 SRD races (Human, Elf, Dwarf, Halfling) with full ability score modifiers, speed, and racial traits displayed.</p>
+    <div class="two-col">
+      <img src="01-create-name.png" alt="Step 1: Name your character">
+      <img src="02-create-race.png" alt="Step 2: Race selection with traits">
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <h3>Class & Fighting Styles <span class="badge badge-green">Phase 8A</span></h3>
+    <p>4 classes (Fighter, Rogue, Cleric, Wizard) with subclass features. Fighters see styled <strong>fighting style cards</strong> with mechanical effects — not just button labels.</p>
+    <img src="03-create-class-fighting-styles.png" alt="Fighting style cards with descriptions">
+  </div>
+
+  <div class="feature-card">
+    <h3>Ability Scores</h3>
+    <p>Three methods: Standard Array, Point Buy (27-point budget with live tracking), or 4d6-drop-lowest rolling. Racial bonuses applied automatically.</p>
+    <img src="04-create-abilities.png" alt="Ability score selection">
+  </div>
+
+  <div class="feature-card">
+    <h3>Background with Expandable Details <span class="badge badge-green">Phase 8A</span></h3>
+    <p>6 SRD backgrounds with skill proficiencies. "Read More" expands to show full description, background feature name, and mechanical effect — no more truncated text.</p>
+    <img src="05-create-background-expanded.png" alt="Background card expanded with full details">
+  </div>
+
+  <div class="feature-card">
+    <h3>Equipment & Pack Contents <span class="badge badge-green">Phase 8A</span></h3>
+    <p>Class-specific equipment choices with expandable pack contents. "View Contents" shows every item inside a pack + gold cost before committing. Supports class defaults, custom selection, and gold-buy mode.</p>
+    <img src="06-create-equipment.png" alt="Equipment selection with pack contents preview">
+  </div>
+
+  <div class="feature-card">
+    <h3>Spell Selection (Casters)</h3>
+    <p>Wizard and Cleric get a dedicated spell step. Browse cantrips and leveled spells with school, range, components, and mechanical descriptions. Prepared spell limits enforced by class rules.</p>
+    <img src="08-create-spells.png" alt="Spell selection for Wizard">
+  </div>
+
+  <div class="feature-card">
+    <h3>Review & Save</h3>
+    <p>Full character summary: computed HP, AC, ability modifiers, equipment list, and spell loadout. Characters persist to IndexedDB with optional Supabase cloud sync.</p>
+    <img src="07-create-review.png" alt="Character review before saving">
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 2. ROSTER & CHARACTER MANAGEMENT -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Character Roster & Management <span class="badge badge-blue">Lifecycle</span></h2>
+
+  <div class="feature-card">
+    <h3>Roster with Random Generator</h3>
+    <p>Character hub with one-click "Random Character" generation. Creates a complete level 1 character with race/class-appropriate stats, equipment, spells, and thematic names.</p>
+    <div class="two-col">
+      <img src="09-roster.png" alt="Character roster page">
+      <img src="10-roster-random-character.png" alt="Random character generated">
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <h3>Character Sheet & Level Up <span class="badge badge-green">Phase 8B</span></h3>
+    <p>Full character sheet with computed stats, skill proficiencies, equipment, and spells. XP eligibility detection triggers a <strong>Level Up wizard</strong> — HP method (roll/average), ASI allocation (+2/+1/+1), new spells, and feature preview.</p>
+    <img src="11-character-sheet.png" alt="Character sheet">
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 3. BATTLE SYSTEM -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Tactical Combat <span class="badge badge-red">Core Engine</span></h2>
+  <p>Full D&D 5e combat with Phaser 3 grid visualization, AI-driven enemies, action economy, reactions, death saves, and reward distribution.</p>
+
+  <div class="feature-card">
+    <h3>Battle Setup</h3>
+    <p>Multiple entry points: <strong>Arena Mode</strong> (roster characters + encounters), <strong>Pre-built Scenarios</strong> (curated combat setups), <strong>Preset Parties</strong> (jump in instantly at Level 1/3/5), and <strong>Analyze</strong> (batch simulation).</p>
+    <div class="two-col">
+      <img src="12-battle-setup.png" alt="Battle setup — Arena Mode">
+      <img src="13-battle-preset-parties.png" alt="Preset parties with encounter selection">
+    </div>
+    <div class="two-col">
+      <img src="14-battle-scenarios.png" alt="Pre-built combat scenarios">
+      <img src="15-battle-analyze.png" alt="Encounter analysis tab">
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <h3>Live Combat</h3>
+    <p>Turn-based tactical combat on a 5ft grid with drag-to-move, click-to-attack, and spell targeting. <strong>BG3-inspired action bar</strong> shows actions, bonus actions, reactions, spell slots, and class features with tooltips.</p>
+    <ul class="highlights">
+      <li>Full action economy: Action, Bonus Action, Reaction, Movement</li>
+      <li>Critical hits, advantage/disadvantage, cover system (+2/+5 AC)</li>
+      <li>18 conditions with duration tracking and auto-expiry</li>
+      <li>Death saving throws with stabilize/death mechanics</li>
+      <li>AoE spells: Fireball (sphere), Lightning Bolt (line), Cone of Cold</li>
+      <li>Consumables: Healing Potions, Scrolls, Antitoxin</li>
+    </ul>
+    <img src="16-combat-active.png" alt="Active combat with Phaser grid">
+  </div>
+
+  <div class="feature-card">
+    <h3>AI Monster System</h3>
+    <p>Hybrid <strong>Behavior Tree + Utility AI</strong> with role-aware decisions. 6 monster roles (Melee, Brute, Skirmisher, Ranged, Caster, Healer) each with distinct targeting priorities, preferred range, and retreat thresholds. AI decisions consistently run in &lt;500ms.</p>
+    <img src="17-combat-turns.png" alt="Combat in progress — AI turns">
+  </div>
+
+  <div class="feature-card">
+    <h3>Reactions System</h3>
+    <ul class="highlights">
+      <li><strong>Shield Spell</strong> — +5 AC as reaction to being hit (with "would it save you?" preview)</li>
+      <li><strong>Opportunity Attacks</strong> — triggered when enemies leave melee range</li>
+      <li><strong>Protection</strong> — impose disadvantage on attacks against adjacent allies</li>
+      <li><strong>Counterspell</strong> — contest enemy spellcasting with ability check</li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 4. DM TOOLS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>DM Tools <span class="badge badge-purple">Creator Suite</span></h2>
+
+  <div class="feature-card">
+    <h3>DM Mode</h3>
+    <p>Toggle DM Mode before combat to <strong>manually control all monster actions</strong>. Move enemies on the grid, select weapons/spells, pick targets — full tactical control with a purple-themed UI that distinguishes DM controls from player controls.</p>
+    <img src="19-dm-mode-combat.png" alt="DM Mode — manual monster control">
+  </div>
+
+  <div class="feature-card">
+    <h3>Encounter Library & Builder</h3>
+    <p>Browse 13 pre-built encounters or create custom ones. Encounter builder with monster search, count selection, difficulty auto-calculator (5e DMG XP thresholds), and reward configuration. Filter by difficulty tier.</p>
+    <div class="two-col">
+      <img src="20-encounter-library.png" alt="Encounter library with difficulty badges">
+      <img src="21-encounter-builder.png" alt="Custom encounter builder">
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <h3>Campaign System</h3>
+    <p>Link a party to an ordered sequence of encounters. Track progress (pending/completed/skipped), auto-mark encounters on victory. Full CRUD with IndexedDB persistence.</p>
+    <img src="22-campaign-list.png" alt="Campaign management">
+  </div>
+
+  <div class="feature-card">
+    <h3>Encounter Analysis Engine</h3>
+    <p>Batch simulation runs N combats (10/50/100) with AI controlling both sides. Reports <strong>win rate</strong>, average rounds, casualty rates, damage distribution, and per-unit breakdowns. Automated difficulty assessment from statistical outcomes.</p>
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- 5. HOMEBREW & SETTINGS -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Homebrew & Data <span class="badge badge-blue">Extensible</span></h2>
+
+  <div class="feature-card">
+    <h3>Monster Builder</h3>
+    <p>Full homebrew monster creation: ability scores, CR (auto-calculates proficiency + XP), hit points, AC, speed, damage resistances/immunities, weapons, AI role, gold/loot drops. Custom monsters are immediately usable in encounters.</p>
+    <img src="23-monster-builder.png" alt="Homebrew monster builder">
+  </div>
+
+  <div class="feature-card">
+    <h3>Import/Export & Settings</h3>
+    <p>JSON import/export for characters. Offline-first architecture with IndexedDB + optional Supabase cloud sync. No external API dependencies for gameplay.</p>
+    <img src="24-settings.png" alt="Settings page">
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- TECHNICAL ARCHITECTURE -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Technical Architecture</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-number">React</div><div class="stat-label">UI Framework</div></div>
+    <div class="stat"><div class="stat-number">Phaser 3</div><div class="stat-label">Game Engine</div></div>
+    <div class="stat"><div class="stat-number">Zustand</div><div class="stat-label">State Mgmt</div></div>
+    <div class="stat"><div class="stat-number">Dexie</div><div class="stat-label">IndexedDB</div></div>
+    <div class="stat"><div class="stat-number">Supabase</div><div class="stat-label">Cloud Sync</div></div>
+    <div class="stat"><div class="stat-number">TypeScript</div><div class="stat-label">Language</div></div>
+  </div>
+
+  <div class="feature-card">
+    <h3>Key Technical Differentiators</h3>
+    <ul class="highlights">
+      <li><strong>Pure TypeScript game engine</strong> — 5,000+ lines of tested combat logic, fully decoupled from UI</li>
+      <li><strong>Offline-first</strong> — complete gameplay without network. Dual-write to IndexedDB + Supabase sync queue</li>
+      <li><strong>Batch simulation</strong> — run 100+ AI-vs-AI combats for statistical encounter balancing</li>
+      <li><strong>Role-based AI</strong> — 6 monster behavior archetypes with utility-scored decision making</li>
+      <li><strong>SRD-compliant</strong> — attack rolls, saving throws, spell slots, conditions, death saves all follow 5e rules</li>
+      <li><strong>273+ automated tests</strong> — engine rules verified with unit tests, E2E with Playwright</li>
+      <li><strong>Cloudflare Pages</strong> deployment with edge-optimized static hosting</li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ROADMAP -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>Roadmap</h2>
+  <div class="feature-card">
+    <ul class="highlights">
+      <li><strong>Phase 9: Multiplayer</strong> — Real-time multiplayer tables/lobbies, server-authoritative combat, Supabase Realtime channels</li>
+      <li><strong>Mobile optimization</strong> — Touch-friendly combat grid, responsive action bar</li>
+      <li><strong>Extended content</strong> — More classes, races, spells up to Level 9, additional monsters</li>
+      <li><strong>Map editor</strong> — Visual grid editor for custom battle maps</li>
+      <li><strong>Character marketplace</strong> — Share and discover community-created characters and encounters</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="meta">
+    <p>Generated for <a href="https://github.com/trtincher/DNDApp">trtincher/DNDApp</a> — 2026-03-31</p>
+    <p>23 automated screenshots + video walkthrough captured via Playwright</p>
+  </div>
+
+</body>
+</html>
