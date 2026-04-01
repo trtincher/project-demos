@@ -9,12 +9,11 @@
     h1 { color: #0969da; border-bottom: 2px solid #d0d7de; padding-bottom: 0.5rem; font-size: 1.5rem; }
     h2 { color: #1a1a1a; margin-top: 2rem; font-size: 1.2rem; }
     .badge { display: inline-block; background: #1a7f37; color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    .badge.bug { background: #cf222e; }
     p { color: #444; line-height: 1.6; }
     img { width: 100%; border: 2px solid #d0d7de; border-radius: 8px; margin: 1rem 0; }
-    video { border: 2px solid #d0d7de; border-radius: 8px; margin: 1rem 0; }
     .feature-list { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
     .feature-list li { margin: 0.5rem 0; color: #444; }
-    .placeholder { background: #f0f4f8; border: 2px dashed #d0d7de; border-radius: 8px; padding: 3rem; text-align: center; color: #666; margin: 1rem 0; font-style: italic; }
     .meta { font-size: 0.85rem; color: #666; margin-top: 2rem; border-top: 1px solid #d0d7de; padding-top: 1rem; }
     a { color: #0969da; }
     code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
@@ -27,37 +26,28 @@
   <h2>Overview</h2>
   <p>The final multiplayer polish phase adds disconnect handling with AI takeover, reconnect recovery, in-game chat, and full table lifecycle management (return to lobby, disband table).</p>
 
+  <hr style="border-color: #d0d7de; margin: 2.5rem 0;">
+
   <h2>1. Disconnect Detection</h2>
-  <p>When a player loses connection mid-combat, presence leave events trigger <code>handlePlayerDisconnect</code> on the host. The player is marked as disconnected in the database.</p>
-  <div class="placeholder">📸 Screenshot: Player disconnect notification in combat</div>
+  <p>When a player loses connection mid-session, they're marked with a red "(disconnected)" label in the player list. The host detects this via Supabase Realtime presence events. After 60 seconds, the host's AI takes over the disconnected player's character.</p>
+  <img src="ss-01-lobby-player-disconnected.png" alt="Lobby showing Player_Gandalf as disconnected with red label">
 
-  <h2>2. AI Takeover (60s Timeout)</h2>
-  <p>After 60 seconds of disconnect, the host runs AI (<code>decideAction</code>) for the disconnected player's character — one move + attack, then auto-ends turn. Chains automatically if multiple players are disconnected.</p>
-  <div class="placeholder">📸 Screenshot: AI taking over a disconnected player's turn</div>
+  <h2>2. In-Game Chat <span class="badge">New</span></h2>
+  <p>Collapsible <code>ChatPanel</code> component available in both lobby and combat. Supports real-time messaging via Supabase Realtime broadcast. Message history (last 100), sender highlighting, and auto-scroll.</p>
+  <img src="ss-02-chat-panel.png" alt="Chat panel expanded showing player messages">
 
-  <h2>3. Reconnect Recovery</h2>
-  <p>When a player reconnects, the host re-sends <code>combat_start</code> (with ownership map) and <code>state_sync</code> so the player immediately sees the current combat state and can resume control.</p>
-  <div class="placeholder">📸 Screenshot: Player reconnecting and seeing current combat state</div>
-
-  <h2>4. In-Game Chat</h2>
-  <p>A collapsible <code>ChatPanel</code> component with message history (last 100 messages), text input, and send button. Uses <code>chat_message</code> broadcast on the Realtime channel. Available in both lobby and combat.</p>
-  <div class="placeholder">📸 Screenshot: Chat panel open with messages between players</div>
-
-  <h2>5. Return to Lobby</h2>
-  <p>After combat ends (victory or defeat), the DM can click "Return to Lobby" to reset combat state and bring all clients back to the lobby for another encounter. No need to create a new table.</p>
-  <div class="placeholder">📸 Screenshot: Return to Lobby button after combat ends</div>
-
-  <h2>6. Disband Table</h2>
-  <p>The DM can disband the table entirely, which closes the session and disconnects all clients. Used when the game session is over.</p>
-  <div class="placeholder">📸 Screenshot: Disband Table confirmation</div>
+  <h2>3. Reconnect Recovery — All Connected</h2>
+  <p>When a disconnected player reconnects, the host re-sends the full combat state so they resync immediately and can resume control. Here all three players are connected and ready.</p>
+  <img src="ss-03-lobby-all-connected.png" alt="Lobby with all players connected and ready">
 
   <h2>Technical Highlights</h2>
   <ul class="feature-list">
-    <li><strong>Presence-based disconnect</strong> — Realtime presence leave triggers host-side handler</li>
-    <li><strong>AI takeover</strong> — Reuses existing <code>decideAction</code> AI for disconnected player turns</li>
-    <li><strong>Reconnect sync</strong> — Full state re-send on presence join during combat</li>
-    <li><strong>Chat system</strong> — Broadcast-based with in-memory store and listener pattern</li>
-    <li><strong>Lifecycle events</strong> — <code>CombatEvent</code> and <code>LifecycleEvent</code> type unions in <code>multiplayer.ts</code></li>
+    <li><strong>Presence-based disconnect</strong> — Realtime presence leave triggers host-side <code>handlePlayerDisconnect</code></li>
+    <li><strong>AI takeover</strong> — After 60s timeout, reuses existing <code>decideAction</code> AI for disconnected player turns</li>
+    <li><strong>Reconnect sync</strong> — Full <code>combat_start</code> + <code>state_sync</code> re-send on presence join</li>
+    <li><strong>Chat system</strong> — Broadcast-based with in-memory store, listener pattern, 100-message cap</li>
+    <li><strong>Table lifecycle</strong> — <code>returnToLobby()</code> resets combat for another round; <code>disbandTable()</code> closes session entirely</li>
+    <li><strong>Event types</strong> — <code>CombatEvent</code> and <code>LifecycleEvent</code> type unions in <code>multiplayer.ts</code></li>
   </ul>
 
   <div class="meta">

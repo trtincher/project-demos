@@ -11,10 +11,8 @@
     .badge { display: inline-block; background: #1a7f37; color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
     p { color: #444; line-height: 1.6; }
     img { width: 100%; border: 2px solid #d0d7de; border-radius: 8px; margin: 1rem 0; }
-    video { border: 2px solid #d0d7de; border-radius: 8px; margin: 1rem 0; }
     .feature-list { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
     .feature-list li { margin: 0.5rem 0; color: #444; }
-    .placeholder { background: #f0f4f8; border: 2px dashed #d0d7de; border-radius: 8px; padding: 3rem; text-align: center; color: #666; margin: 1rem 0; font-style: italic; }
     .meta { font-size: 0.85rem; color: #666; margin-top: 2rem; border-top: 1px solid #d0d7de; padding-top: 1rem; }
     a { color: #0969da; }
     code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
@@ -27,25 +25,23 @@
   <h2>Overview</h2>
   <p>The multiplayer foundation adds real-time lobby infrastructure powered by Supabase Realtime. Players can host or join tables using a 6-character code, select characters, pick encounters, and launch into combat together.</p>
 
+  <hr style="border-color: #d0d7de; margin: 2.5rem 0;">
+
   <h2>1. Multiplayer Entry — Host or Join</h2>
-  <p>New Multiplayer page accessible from the roster. The host creates a table and gets a shareable code. Other players enter the code to join.</p>
-  <div class="placeholder">📸 Screenshot: Multiplayer page with Host Table / Join Table options</div>
+  <p>New Multiplayer page accessible from the roster. The host creates a table and gets a shareable 6-character code. Other players enter the code to join.</p>
+  <img src="ss-01-multiplayer-landing.png" alt="Multiplayer landing page with Host Table and Join Table cards">
 
-  <h2>2. Live Lobby — Real-Time Player List</h2>
-  <p>Once in a table, all players see a live lobby with presence tracking. Each player selects a character from their roster. The host picks an encounter and sees everyone's ready state in real time.</p>
-  <div class="placeholder">📸 Screenshot: Lobby with player list, character selection, ready states</div>
+  <h2>2. Live Lobby — Players Joined</h2>
+  <p>Once in a table, all players see a live lobby with presence tracking. Each player has a role badge ([DM] or [P]), character info, and ready state. The host sees encounter selection and Start Combat controls on the right.</p>
+  <img src="ss-02-lobby-players-joined.png" alt="Lobby with three players, character selections, and ready states">
 
-  <h2>3. Character Selection</h2>
-  <p>Players choose from their saved roster. Selection updates broadcast instantly to all lobby participants via Supabase Realtime presence.</p>
-  <div class="placeholder">📸 Screenshot: Character picker modal in lobby</div>
+  <h2>3. Ready to Start Combat</h2>
+  <p>When all players are ready and an encounter is selected, the Start Combat button activates. The encounter card shows name, difficulty badge, and monster count.</p>
+  <img src="ss-03-lobby-ready-to-start.png" alt="Lobby with all players ready, encounter selected, Start Combat enabled">
 
-  <h2>4. Encounter Picker (Host Only)</h2>
-  <p>The host selects from prebuilt scenarios or custom encounters. All players see the selected encounter details update live.</p>
-  <div class="placeholder">📸 Screenshot: Encounter picker modal showing prebuilt + custom encounters</div>
-
-  <h2>5. Connection Status</h2>
-  <p>A persistent connection indicator shows Realtime channel status. Players see when they're connected, reconnecting, or disconnected.</p>
-  <div class="placeholder">📸 Screenshot: Connection status indicator</div>
+  <h2>4. Roster — Multiplayer Nav Link</h2>
+  <p>The multiplayer entry point is accessible directly from the character roster page.</p>
+  <img src="ss-04-roster-multiplayer-link.png" alt="Roster page showing multiplayer navigation">
 
   <h2>Technical Highlights</h2>
   <ul class="feature-list">
