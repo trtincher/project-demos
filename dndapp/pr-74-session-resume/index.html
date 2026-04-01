@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR #74 — Save &amp; Resume Sessions Demo</title>
+  <style>
+    body { background: #ffffff; color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif; max-width: 960px; margin: 0 auto; padding: 1rem; }
+    h1 { color: #0969da; border-bottom: 2px solid #d0d7de; padding-bottom: 0.5rem; font-size: 1.5rem; }
+    h2 { color: #1a1a1a; margin-top: 2rem; font-size: 1.2rem; }
+    .badge { display: inline-block; background: #1a7f37; color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    p { color: #444; line-height: 1.6; }
+    img { width: 100%; border: 2px solid #d0d7de; border-radius: 8px; margin: 1rem 0; }
+    .feature-list { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 1rem 1.5rem; margin: 1rem 0; }
+    .feature-list li { margin: 0.5rem 0; color: #444; }
+    .meta { font-size: 0.85rem; color: #666; margin-top: 2rem; border-top: 1px solid #d0d7de; padding-top: 1rem; }
+    a { color: #0969da; }
+    code { background: #f6f8fa; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>PR #74 — Save &amp; Resume Multiplayer Sessions</h1>
+  <p>Feature branch: <code>feat/session-resume</code> | Closes #71</p>
+
+  <h2>Overview</h2>
+  <p>The DM can now save combat mid-session and resume it later. Suspended sessions appear on the Multiplayer page with encounter name, turn number, and player count. Players rejoin via the same table code.</p>
+
+  <hr style="border-color: #d0d7de; margin: 2.5rem 0;">
+
+  <h2>1. Saved Games on Multiplayer Page <span class="badge">New</span></h2>
+  <p>Suspended sessions appear below the Host/Join cards. Each entry shows the encounter name, table code, turn number, player count, and save date. Click to rejoin and resume.</p>
+  <img src="ss-01-multiplayer-saved-games.png" alt="Multiplayer page showing Saved Games section with two suspended sessions">
+
+  <h2>2. Lobby with Resume Combat Button <span class="badge">New</span></h2>
+  <p>When a session has saved combat state, the lobby shows a green "Resume Saved Combat" button above the normal Start Combat button. Players rejoin and the DM resumes when ready.</p>
+  <img src="ss-02-lobby-resume-button.png" alt="Lobby showing Resume Saved Combat button for the host">
+
+  <h2>3. Save &amp; Exit Confirmation <span class="badge">New</span></h2>
+  <p>During combat, the DM sees a "Save &amp; Exit" button in the sidebar. Clicking it shows a confirmation dialog explaining that all players will be disconnected and the session can be resumed later.</p>
+  <img src="ss-03-save-exit-confirm.png" alt="Save and Exit confirmation dialog with Save and Cancel buttons">
+
+  <h2>Technical Highlights</h2>
+  <ul class="feature-list">
+    <li><strong>New session status <code>'suspended'</code></strong> — persists combat state + ownership map to DB</li>
+    <li><strong><code>saveAndExitCombat()</code></strong> — broadcasts <code>session_suspended</code>, cleans up all clients</li>
+    <li><strong><code>deserializeCombatState()</code></strong> — reconstructs combatStore from JSONB snapshot</li>
+    <li><strong><code>getSuspendedSessions(userId)</code></strong> — fetches saved games from Supabase</li>
+    <li><strong><code>resumeSession()</code> / <code>resumeCombat()</code></strong> — reloads session, restores state, re-broadcasts to players</li>
+    <li><strong>Supabase migration</strong> — adds <code>'suspended'</code> to status CHECK and <code>ownership_map JSONB</code> column</li>
+  </ul>
+
+  <div class="meta">
+    Generated for <a href="https://github.com/trtincher/DNDApp/pull/74">trtincher/DNDApp#74</a> — 2026-04-01
+  </div>
+</body>
+</html>
