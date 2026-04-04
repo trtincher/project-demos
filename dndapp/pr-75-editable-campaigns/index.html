@@ -3,24 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PR #81: Editable Campaign Elements | DNDApp</title>
+  <title>PR #81 — Editable Campaign Elements | DNDApp</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #c8d6e5; line-height: 1.6; }
-    .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
     h1 { color: #f5a623; font-size: 1.75rem; margin-bottom: 0.25rem; }
     .subtitle { color: #6b7c93; font-size: 0.9rem; margin-bottom: 2rem; }
     .subtitle a { color: #f5a623; text-decoration: none; }
     .subtitle a:hover { text-decoration: underline; }
-    h2 { color: #e2e8f0; font-size: 1.1rem; margin: 2rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
-    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem; }
-    .badge-amber { background: rgba(245,166,35,0.2); color: #f5a623; }
-    .badge-green { background: rgba(72,199,142,0.2); color: #48c78e; }
-    .badge-purple { background: rgba(168,85,247,0.2); color: #a855f7; }
-    .badge-sky { background: rgba(56,189,248,0.2); color: #38bdf8; }
-    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-    .card h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.5rem; }
-    .card p { color: #8896a6; font-size: 0.85rem; }
+    h2 { color: #e2e8f0; font-size: 1.2rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+    p { color: #8896a6; line-height: 1.6; font-size: 0.9rem; }
+    img { width: 100%; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 1rem 0; }
+    .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0 2rem; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #f5a623; }
+    .stat-label { font-size: 0.75rem; color: #6b7c93; text-transform: uppercase; letter-spacing: 0.05em; }
     .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
     @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
     .before, .after { border-radius: 8px; padding: 1rem; font-size: 0.8rem; }
@@ -32,30 +30,31 @@
     table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
     th { text-align: left; color: #8896a6; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 500; }
     td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d6e5; }
-    .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
-    .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; color: #f5a623; }
-    .stat-label { font-size: 0.75rem; color: #6b7c93; text-transform: uppercase; letter-spacing: 0.05em; }
-    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); color: #4a5568; font-size: 0.8rem; text-align: center; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+    .meta { font-size: 0.85rem; color: #4a5568; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; text-align: center; }
+    .meta a { color: #f5a623; text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Editable Campaign Elements</h1>
     <p class="subtitle">
-      <a href="https://github.com/trtincher/DNDApp/pull/81">PR #81</a> &mdash; Closes
-      <a href="https://github.com/trtincher/DNDApp/issues/75">#75</a>
+      <a href="https://github.com/trtincher/DNDApp/pull/81">PR #81</a> &mdash;
+      Closes <a href="https://github.com/trtincher/DNDApp/issues/75">#75</a>,
+      <a href="https://github.com/trtincher/DNDApp/issues/76">#76</a>,
+      <a href="https://github.com/trtincher/DNDApp/issues/77">#77</a>,
+      <a href="https://github.com/trtincher/DNDApp/issues/78">#78</a>,
+      <a href="https://github.com/trtincher/DNDApp/issues/79">#79</a>,
+      <a href="https://github.com/trtincher/DNDApp/issues/80">#80</a>
+      &mdash; Branch: <code>feat/10a-campaign-metadata-editing</code>
     </p>
 
     <div class="stats">
       <div class="stat"><div class="stat-value">6</div><div class="stat-label">New Components</div></div>
       <div class="stat"><div class="stat-value">8</div><div class="stat-label">Store Actions</div></div>
       <div class="stat"><div class="stat-value">2,137</div><div class="stat-label">Lines Added</div></div>
-      <div class="stat"><div class="stat-value">5</div><div class="stat-label">Issues Closed</div></div>
+      <div class="stat"><div class="stat-value">6</div><div class="stat-label">Issues Closed</div></div>
     </div>
-
-    <h2>Problem</h2>
-    <p style="color:#8896a6; font-size:0.9rem;">Once a campaign was created, its elements were completely static. DMs had to delete and recreate entire campaigns just to adjust party members, reorder encounters, or rebalance difficulty mid-session.</p>
 
     <h2>Before / After</h2>
     <div class="comparison">
@@ -81,55 +80,64 @@
       </div>
     </div>
 
-    <h2>Capabilities</h2>
+    <hr style="border-color: rgba(255,255,255,0.08); margin: 2.5rem 0;">
 
-    <div class="card">
-      <h3><span class="badge badge-amber">R1</span> Metadata Editing</h3>
-      <p>Click campaign name or description to edit inline. Save on Enter/blur, cancel on Escape. Empty names rejected.</p>
-    </div>
+    <h2>1. Campaign Detail Page</h2>
+    <p>The redesigned campaign detail page with editable name, party roster with add/remove controls, encounter list with reorder buttons, and "+ Add Encounter" / "+ Add Member" actions.</p>
+    <img src="ss-01-campaign-detail.png" alt="Campaign detail page with editable elements">
 
-    <div class="card">
-      <h3><span class="badge badge-green">R2</span> Party Management</h3>
-      <p>Add characters from roster with toggle picker. Remove with confirmation dialog. Removing a member auto-cleans per-encounter overrides.</p>
-    </div>
+    <h2>2. Inline Name Editing</h2>
+    <p>Click the campaign name to activate edit mode. Save on Enter or blur, cancel on Escape. Empty names are rejected.</p>
+    <img src="ss-02-editing-name.png" alt="Editing campaign name inline">
 
-    <div class="card">
-      <h3><span class="badge badge-amber">R4</span> Encounter Management</h3>
-      <p>Add encounters from library via modal with search. Remove pending encounters. Reorder with Up/Dn controls. currentEncounterIndex auto-recalculates.</p>
-    </div>
+    <h2>3. Inline Description Editing</h2>
+    <p>Click the description to open a textarea for multi-line editing. Same save/cancel behavior as the name field.</p>
+    <img src="ss-03-editing-description.png" alt="Editing campaign description inline">
 
-    <div class="card">
-      <h3><span class="badge badge-sky">R3</span> Per-Encounter Party</h3>
-      <p>Toggle which party members participate in each encounter. "Use Full Party" resets. Battle launch respects the override. <span class="badge badge-sky">3/5 party</span> badge shown.</p>
-    </div>
+    <h2>4. Party Member Management</h2>
+    <p>Click "+ Add Member" to reveal available characters not yet in the party. Each party member badge has an [x] remove button with a confirmation dialog. Removing a member also cleans up per-encounter party overrides.</p>
+    <img src="ss-04-add-party-member.png" alt="Adding a party member to the campaign">
 
-    <div class="card">
-      <h3><span class="badge badge-purple">R5</span> Encounter Scaling</h3>
-      <p>Adjust enemy count with +/- controls (max 10). Add/remove enemy types from monster library. Live difficulty badge recalculates. <span class="badge badge-purple">Customized</span> badge shown. "Reset to Original" clears overrides. Original encounter template never modified.</p>
-    </div>
+    <h2>5. Add Encounter Modal</h2>
+    <p>Click "+ Add Encounter" to open the encounter library. Search by name or difficulty. Multi-select encounters and add them to the campaign. New encounters default to "pending" status.</p>
+    <img src="ss-05-add-encounter-modal.png" alt="Add encounter modal with search and multi-select">
+
+    <h2>6. Per-Encounter Party Selection</h2>
+    <p>Click "Party" on any pending encounter to toggle which party members participate. Deselected members sit out. "Use Full Party" resets the override. A badge shows the count (e.g., "3/4 party").</p>
+    <img src="ss-06-encounter-party-picker.png" alt="Per-encounter party picker with toggle buttons">
+
+    <h2>7. Encounter Enemy Scaling</h2>
+    <p>Click "Scale" to adjust enemy composition. Use +/- controls to change counts (max 10). The difficulty badge recalculates live using the D&amp;D 5e encounter math. A "Customized" badge appears on modified encounters.</p>
+    <img src="ss-07-encounter-scaler.png" alt="Encounter scaler with enemy count controls and difficulty badge">
+
+    <h2>8. Monster Picker</h2>
+    <p>Click "+ Add Enemy" to browse the full monster library. Search by name or type. Click to add a new enemy type or increment an existing one. "Reset to Original" clears all overrides.</p>
+    <img src="ss-08-monster-picker.png" alt="Monster picker for adding enemy types to an encounter">
+
+    <hr style="border-color: rgba(255,255,255,0.08); margin: 2.5rem 0;">
 
     <h2>New Components</h2>
     <table>
       <tr><th>Component</th><th>Purpose</th></tr>
-      <tr><td>EditableText</td><td>Reusable click-to-edit field</td></tr>
-      <tr><td>PartyRosterEditor</td><td>Add/remove party members</td></tr>
-      <tr><td>EncounterListEditor</td><td>Encounter CRUD + reorder</td></tr>
-      <tr><td>AddEncounterModal</td><td>Encounter library picker</td></tr>
-      <tr><td>EncounterPartyPicker</td><td>Per-encounter party toggle</td></tr>
-      <tr><td>EncounterScaler</td><td>Enemy scaling + difficulty calc</td></tr>
+      <tr><td><code>EditableText</code></td><td>Reusable click-to-edit for name &amp; description</td></tr>
+      <tr><td><code>PartyRosterEditor</code></td><td>Add/remove party members with toggle picker</td></tr>
+      <tr><td><code>EncounterListEditor</code></td><td>Encounter CRUD with reorder controls</td></tr>
+      <tr><td><code>AddEncounterModal</code></td><td>Encounter library picker with search</td></tr>
+      <tr><td><code>EncounterPartyPicker</code></td><td>Per-encounter party toggle buttons</td></tr>
+      <tr><td><code>EncounterScaler</code></td><td>Enemy scaling with live difficulty badge</td></tr>
     </table>
 
     <h2>Technical Details</h2>
     <table>
       <tr><th>Aspect</th><th>Detail</th></tr>
       <tr><td>Data model</td><td>Added <code>CampaignEncounterEnemy</code> type; extended <code>CampaignEncounter</code> with optional <code>partyOverride</code> and <code>enemyOverrides</code></td></tr>
-      <tr><td>Persistence</td><td>All writes through Dexie (IndexedDB). No schema migration needed &mdash; new fields are optional.</td></tr>
-      <tr><td>Battle integration</td><td>BattlePage accepts <code>enemyOverrides</code> via router state, spawns overridden enemies with auto-generated positions.</td></tr>
-      <tr><td>Index safety</td><td>Shared <code>recalculateCurrentIndex</code> helper used by all structural mutations.</td></tr>
+      <tr><td>Persistence</td><td>All writes via Dexie (IndexedDB). No schema migration &mdash; new fields are optional, not indexed.</td></tr>
+      <tr><td>Battle integration</td><td>BattlePage accepts <code>enemyOverrides</code> via router state and spawns overridden enemies with auto-generated positions.</td></tr>
+      <tr><td>Index safety</td><td>Shared <code>recalculateCurrentIndex</code> helper used by all structural mutations (add/remove/reorder/skip/complete).</td></tr>
     </table>
 
-    <div class="footer">
-      DNDApp &mdash; Built with React, Zustand, Dexie, Phaser, Tailwind CSS
+    <div class="meta">
+      Generated for <a href="https://github.com/trtincher/DNDApp/pull/81">trtincher/DNDApp#81</a> &mdash; 2026-04-04
     </div>
   </div>
 </body>
