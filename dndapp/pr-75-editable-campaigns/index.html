@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR #81: Editable Campaign Elements | DNDApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #c8d6e5; line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { color: #f5a623; font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #6b7c93; font-size: 0.9rem; margin-bottom: 2rem; }
+    .subtitle a { color: #f5a623; text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+    h2 { color: #e2e8f0; font-size: 1.1rem; margin: 2rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 0.25rem; }
+    .badge-amber { background: rgba(245,166,35,0.2); color: #f5a623; }
+    .badge-green { background: rgba(72,199,142,0.2); color: #48c78e; }
+    .badge-purple { background: rgba(168,85,247,0.2); color: #a855f7; }
+    .badge-sky { background: rgba(56,189,248,0.2); color: #38bdf8; }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    .card h3 { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .card p { color: #8896a6; font-size: 0.85rem; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+    .before, .after { border-radius: 8px; padding: 1rem; font-size: 0.8rem; }
+    .before { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+    .after { background: rgba(72,199,142,0.08); border: 1px solid rgba(72,199,142,0.2); }
+    .before h4 { color: #ef4444; margin-bottom: 0.5rem; }
+    .after h4 { color: #48c78e; margin-bottom: 0.5rem; }
+    .before li, .after li { color: #8896a6; margin-left: 1rem; margin-bottom: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    th { text-align: left; color: #8896a6; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 500; }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d6e5; }
+    .stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #f5a623; }
+    .stat-label { font-size: 0.75rem; color: #6b7c93; text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); color: #4a5568; font-size: 0.8rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Editable Campaign Elements</h1>
+    <p class="subtitle">
+      <a href="https://github.com/trtincher/DNDApp/pull/81">PR #81</a> &mdash; Closes
+      <a href="https://github.com/trtincher/DNDApp/issues/75">#75</a>
+    </p>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-value">6</div><div class="stat-label">New Components</div></div>
+      <div class="stat"><div class="stat-value">8</div><div class="stat-label">Store Actions</div></div>
+      <div class="stat"><div class="stat-value">2,137</div><div class="stat-label">Lines Added</div></div>
+      <div class="stat"><div class="stat-value">5</div><div class="stat-label">Issues Closed</div></div>
+    </div>
+
+    <h2>Problem</h2>
+    <p style="color:#8896a6; font-size:0.9rem;">Once a campaign was created, its elements were completely static. DMs had to delete and recreate entire campaigns just to adjust party members, reorder encounters, or rebalance difficulty mid-session.</p>
+
+    <h2>Before / After</h2>
+    <div class="comparison">
+      <div class="before">
+        <h4>Before</h4>
+        <ul>
+          <li>Campaign name &amp; description: read-only</li>
+          <li>Party members: frozen at creation</li>
+          <li>Encounters: fixed order, no add/remove</li>
+          <li>Enemy composition: unchangeable</li>
+          <li>Party per encounter: always full party</li>
+        </ul>
+      </div>
+      <div class="after">
+        <h4>After</h4>
+        <ul>
+          <li>Click-to-edit name &amp; description</li>
+          <li>Add/remove party members anytime</li>
+          <li>Add/remove/reorder encounters</li>
+          <li>Scale enemy counts &amp; types per encounter</li>
+          <li>Select which party members per encounter</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Capabilities</h2>
+
+    <div class="card">
+      <h3><span class="badge badge-amber">R1</span> Metadata Editing</h3>
+      <p>Click campaign name or description to edit inline. Save on Enter/blur, cancel on Escape. Empty names rejected.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge badge-green">R2</span> Party Management</h3>
+      <p>Add characters from roster with toggle picker. Remove with confirmation dialog. Removing a member auto-cleans per-encounter overrides.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge badge-amber">R4</span> Encounter Management</h3>
+      <p>Add encounters from library via modal with search. Remove pending encounters. Reorder with Up/Dn controls. currentEncounterIndex auto-recalculates.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge badge-sky">R3</span> Per-Encounter Party</h3>
+      <p>Toggle which party members participate in each encounter. "Use Full Party" resets. Battle launch respects the override. <span class="badge badge-sky">3/5 party</span> badge shown.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="badge badge-purple">R5</span> Encounter Scaling</h3>
+      <p>Adjust enemy count with +/- controls (max 10). Add/remove enemy types from monster library. Live difficulty badge recalculates. <span class="badge badge-purple">Customized</span> badge shown. "Reset to Original" clears overrides. Original encounter template never modified.</p>
+    </div>
+
+    <h2>New Components</h2>
+    <table>
+      <tr><th>Component</th><th>Purpose</th></tr>
+      <tr><td>EditableText</td><td>Reusable click-to-edit field</td></tr>
+      <tr><td>PartyRosterEditor</td><td>Add/remove party members</td></tr>
+      <tr><td>EncounterListEditor</td><td>Encounter CRUD + reorder</td></tr>
+      <tr><td>AddEncounterModal</td><td>Encounter library picker</td></tr>
+      <tr><td>EncounterPartyPicker</td><td>Per-encounter party toggle</td></tr>
+      <tr><td>EncounterScaler</td><td>Enemy scaling + difficulty calc</td></tr>
+    </table>
+
+    <h2>Technical Details</h2>
+    <table>
+      <tr><th>Aspect</th><th>Detail</th></tr>
+      <tr><td>Data model</td><td>Added <code>CampaignEncounterEnemy</code> type; extended <code>CampaignEncounter</code> with optional <code>partyOverride</code> and <code>enemyOverrides</code></td></tr>
+      <tr><td>Persistence</td><td>All writes through Dexie (IndexedDB). No schema migration needed &mdash; new fields are optional.</td></tr>
+      <tr><td>Battle integration</td><td>BattlePage accepts <code>enemyOverrides</code> via router state, spawns overridden enemies with auto-generated positions.</td></tr>
+      <tr><td>Index safety</td><td>Shared <code>recalculateCurrentIndex</code> helper used by all structural mutations.</td></tr>
+    </table>
+
+    <div class="footer">
+      DNDApp &mdash; Built with React, Zustand, Dexie, Phaser, Tailwind CSS
+    </div>
+  </div>
+</body>
+</html>
