@@ -27,6 +27,8 @@
     td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d6e5; vertical-align: top; }
     code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #f5a623; }
     pre { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 0.75rem 1rem; margin: 0.75rem 0; overflow-x: auto; font-size: 0.8rem; color: #c8d6e5; }
+    img { width: 100%; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 0.5rem 0 0.25rem; display: block; }
+    .caption { color: #6b7c93; font-size: 0.8rem; font-style: italic; margin-bottom: 1.5rem; text-align: center; }
     pre code { background: none; padding: 0; color: inherit; }
     .meta { font-size: 0.85rem; color: #4a5568; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; text-align: center; }
     .meta a { color: #f5a623; text-decoration: none; }
@@ -37,6 +39,22 @@
   <div class="container">
     <h1>Campaign Cloud Sync</h1>
     <p class="subtitle">PR #82 · Closes <a href="https://github.com/trtincher/DNDApp/issues/82">#82</a> · Infrastructure — no visual changes</p>
+
+    <h2>Surface That Now Syncs</h2>
+    <p>The campaign detail page below is the entire user-facing surface wired up in this PR. Every editable field — name, description, party roster, encounter list, per-encounter party overrides, enemy scaling, completion state — now dual-writes to Supabase on every edit.</p>
+    <img src="ss-01-campaign-detail.png" alt="Campaign detail page">
+    <p class="caption">ss-01 — Campaign detail page with 3 party members and 3 encounters. Encounter 2 has a party override (2/3 party badge) — one of the newer fields in the jsonb column.</p>
+
+    <img src="ss-02-inline-edit.png" alt="Inline campaign name edit">
+    <p class="caption">ss-02 — Inline name edit. Each keystroke that commits hits <code>updateCampaignMeta</code>, which now enqueues a cloud upsert.</p>
+
+    <img src="ss-03-campaigns-list.png" alt="Campaigns list page">
+    <p class="caption">ss-03 — Campaigns list. Create/Delete here go through <code>saveCampaign</code> / <code>deleteCampaign</code>, both now sync-wired.</p>
+
+    <h2>Sync Queue Evidence</h2>
+    <p>Rows written to Dexie's <code>syncQueue</code> when the 12 campaign store actions fire. <code>flushSyncQueue</code> drains these against Supabase when online; pending items are replayed on reconnect. This is the contract between the store layer and the sync layer.</p>
+    <img src="ss-04-sync-queue.png" alt="Dexie sync queue rows for campaign writes">
+    <p class="caption">ss-04 — Sync queue populated from a representative trace of campaign store actions, including a delete for good measure.</p>
 
     <h2>The Problem</h2>
     <p>Campaigns were local-only. Unlike characters and custom encounters, they had no Supabase sync — if you cleared browser data or logged in from another device, your campaigns were gone. The <code>campaignStore</code> comment claimed to follow "the same dual-write pattern as characterStore" but only the Dexie half had been implemented.</p>
