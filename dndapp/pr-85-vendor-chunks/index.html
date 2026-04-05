@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR #85 — Vendor Chunk Split | DNDApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #c8d6e5; line-height: 1.6; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { color: #f5a623; font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #6b7c93; font-size: 0.9rem; margin-bottom: 2rem; }
+    .subtitle a { color: #f5a623; text-decoration: none; }
+    h2 { color: #e2e8f0; font-size: 1.2rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+    p { color: #8896a6; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; color: #f5a623; font-size: 0.85em; font-family: 'SF Mono', Menlo, monospace; }
+    img { width: 100%; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 0.5rem 0 0.25rem; display: block; }
+    .caption { color: #6b7c93; font-size: 0.8rem; font-style: italic; margin-bottom: 1.5rem; text-align: center; }
+    .headline { background: rgba(72,199,142,0.08); border-left: 3px solid #48c78e; padding: 0.85rem 1.25rem; margin: 1rem 0 2rem; font-size: 0.88rem; color: #c8d6e5; border-radius: 0 6px 6px 0; }
+    .meta { font-size: 0.85rem; color: #4a5568; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; text-align: center; }
+    .meta a { color: #f5a623; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vendor Chunk Split</h1>
+    <p class="subtitle">PR #87 · Closes <a href="https://github.com/trtincher/DNDApp/issues/85">#85</a> · Build fix</p>
+
+    <div class="headline">
+      <strong>TL;DR:</strong> The Cloudflare production build has been failing on every merge to main for weeks — not a recent regression. Root cause is vite-plugin-pwa's 2 MiB workbox precache limit: the main JS bundle was teetering right at the cliff (2.0 MB local, 2.2 MB on Cloudflare's bun-based install). Fix is 18 lines in <code>vite.config.ts</code> that split phaser / react / dexie into their own chunks. Main bundle drops 67% (2,015 → 653 KB) and every chunk lands comfortably under the limit.
+    </div>
+
+    <h2>The real error</h2>
+    <p>Pulled from the Cloudflare Workers build dashboard. The issue filed (#85) guessed at likely suspects (env vars, Node version, bundle-size-to-Workers-limits). All wrong — the error had nothing to do with Cloudflare. It's a local vite-plugin-pwa / workbox constraint that just happened to manifest in Cloudflare's build environment first.</p>
+    <img src="ss-01-error-log.png" alt="Actual Cloudflare build log showing workbox 2 MiB limit error">
+    <p class="caption">ss-01 — The 2 MiB workbox precache limit error, confirmed failing on 6 prior merges going back to #69.</p>
+
+    <h2>Before vs after</h2>
+    <p>The fix splits heavy vendor deps via <code>rollupOptions.output.manualChunks</code>. Phaser (~1.2 MB) was the biggest offender. It only loads on battle-grid pages, so splitting it out means first-visit users who never hit combat don't pay for it either.</p>
+    <img src="ss-02-before-after.png" alt="Bundle chunks before and after">
+    <p class="caption">ss-02 — Before: one 2.2 MB main chunk that busts workbox's limit. After: four vendor chunks, a 653 KB main, phaser loaded on-demand.</p>
+
+    <h2>The fix</h2>
+    <p>18 lines in <code>vite.config.ts</code>. Zero code changes. Zero dependency changes.</p>
+    <img src="ss-03-fix-diff.png" alt="Diff of vite.config.ts change">
+    <p class="caption">ss-03 — The full diff. Also includes a rationale footer explaining why manualChunks beats the naive <code>workbox.maximumFileSizeToCacheInBytes</code> bump.</p>
+
+    <h2>Verified locally</h2>
+    <img src="ss-04-build-success.png" alt="Successful local build output">
+    <p class="caption">ss-04 — <code>npm run build</code> with the fix. All 10 chunks precache cleanly (2047.23 KiB total). No workbox errors.</p>
+
+    <div class="meta">
+      <a href="https://github.com/trtincher/DNDApp/pull/87">View PR on GitHub</a> · Generated with Claude Code
+    </div>
+  </div>
+</body>
+</html>
