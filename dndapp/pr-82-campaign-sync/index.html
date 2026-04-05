@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR #82 — Campaign Cloud Sync | DNDApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #c8d6e5; line-height: 1.6; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { color: #f5a623; font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #6b7c93; font-size: 0.9rem; margin-bottom: 2rem; }
+    .subtitle a { color: #f5a623; text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+    h2 { color: #e2e8f0; font-size: 1.2rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+    p { color: #8896a6; line-height: 1.6; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+    .before, .after { border-radius: 8px; padding: 1rem; font-size: 0.85rem; }
+    .before { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+    .after { background: rgba(72,199,142,0.08); border: 1px solid rgba(72,199,142,0.2); }
+    .before h4 { color: #ef4444; margin-bottom: 0.5rem; }
+    .after h4 { color: #48c78e; margin-bottom: 0.5rem; }
+    .before li, .after li { color: #8896a6; margin-left: 1rem; margin-bottom: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    th { text-align: left; color: #8896a6; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 500; }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d6e5; vertical-align: top; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #f5a623; }
+    pre { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 0.75rem 1rem; margin: 0.75rem 0; overflow-x: auto; font-size: 0.8rem; color: #c8d6e5; }
+    pre code { background: none; padding: 0; color: inherit; }
+    .meta { font-size: 0.85rem; color: #4a5568; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; text-align: center; }
+    .meta a { color: #f5a623; text-decoration: none; }
+    .note { background: rgba(245,166,35,0.08); border-left: 3px solid #f5a623; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: #c8d6e5; border-radius: 0 6px 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Campaign Cloud Sync</h1>
+    <p class="subtitle">PR #82 · Closes <a href="https://github.com/trtincher/DNDApp/issues/82">#82</a> · Infrastructure — no visual changes</p>
+
+    <h2>The Problem</h2>
+    <p>Campaigns were local-only. Unlike characters and custom encounters, they had no Supabase sync — if you cleared browser data or logged in from another device, your campaigns were gone. The <code>campaignStore</code> comment claimed to follow "the same dual-write pattern as characterStore" but only the Dexie half had been implemented.</p>
+
+    <div class="comparison">
+      <div class="before">
+        <h4>Before</h4>
+        <ul>
+          <li>Campaigns in IndexedDB only</li>
+          <li>Lost on browser data clear</li>
+          <li>Not available across devices</li>
+          <li>12 campaign store actions, 0 <code>enqueueSync</code> calls</li>
+        </ul>
+      </div>
+      <div class="after">
+        <h4>After</h4>
+        <ul>
+          <li>Dual-write: Dexie → Supabase queue</li>
+          <li>Last-write-wins via <code>updated_at</code></li>
+          <li>Pull-from-cloud on sign-in</li>
+          <li>All 12 actions queue cloud sync</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Schema</h2>
+    <p>New migration <code>20260405000000_campaigns.sql</code> mirrors the client shape:</p>
+    <pre><code>CREATE TABLE public.campaigns (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  encounters JSONB NOT NULL DEFAULT '[]'::jsonb,
+  party_character_ids TEXT[] NOT NULL DEFAULT '{}',
+  current_encounter_index INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);</code></pre>
+    <p>Standard RLS policies (<code>auth.uid() = user_id</code>) for all four CRUD operations, plus an <code>updated_at</code> trigger that reuses the function from the initial schema.</p>
+
+    <h2>Sync Wiring</h2>
+    <table>
+      <thead><tr><th>Layer</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td><code>cloudDb.ts</code></td><td>New <code>fetchCloudCampaigns</code>, <code>upsertCloudCampaign</code>, <code>deleteCloudCampaign</code> + row ↔ Campaign converters (camelCase/snake_case)</td></tr>
+        <tr><td><code>sync.ts</code></td><td>Extend <code>SyncQueueItem['table']</code> union with <code>'campaigns'</code>, handle in <code>flushSyncQueue</code>, pull campaigns in <code>pullFromCloud</code> after characters</td></tr>
+        <tr><td><code>campaignStore.ts</code></td><td><code>enqueueSync('campaigns', ...)</code> call added to all 12 write actions</td></tr>
+        <tr><td><code>migration.ts</code></td><td>First-login push includes campaigns after characters (FK ordering)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Store Actions Wired</h2>
+    <table>
+      <tbody>
+        <tr><td><code>saveCampaign</code></td><td>upsert</td></tr>
+        <tr><td><code>deleteCampaign</code></td><td>delete</td></tr>
+        <tr><td><code>updateCampaignMeta</code></td><td>upsert</td></tr>
+        <tr><td><code>addPartyMembers</code> / <code>removePartyMember</code></td><td>upsert</td></tr>
+        <tr><td><code>addEncounters</code> / <code>removeEncounter</code> / <code>reorderEncounters</code></td><td>upsert</td></tr>
+        <tr><td><code>setEncounterPartyOverride</code> / <code>setEncounterEnemyOverrides</code></td><td>upsert</td></tr>
+        <tr><td><code>completeEncounter</code> / <code>skipEncounter</code></td><td>upsert</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Ordering Note</h2>
+    <div class="note">
+      Campaigns reference character IDs via <code>party_character_ids</code>. If pulled before characters on a new device, those references would dangle. <code>pullFromCloud</code> already pulls characters first, and first-login migration pushes characters before campaigns, so references resolve correctly on every sync path.
+    </div>
+
+    <h2>Conflict Resolution</h2>
+    <p>Last-write-wins keyed on <code>updated_at</code>, matching the existing pattern for characters. Concurrent edits from two devices will clobber one another — acceptable given single-user DM workflows. A finer-grained merge (per-encounter) is future work if it becomes a real problem.</p>
+
+    <h2>Scope Boundary</h2>
+    <p>This is independent of the multiplayer <code>combat_sessions</code> system, which has its own Supabase tables and realtime channels. Campaigns are persistent DM-owned data; combat sessions are ephemeral shared state.</p>
+
+    <div class="meta">
+      <a href="https://github.com/trtincher/DNDApp/pull/82">View PR on GitHub</a> · Generated with Claude Code
+    </div>
+  </div>
+</body>
+</html>
