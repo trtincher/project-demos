@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PR #84 — Supabase Migration CI | DNDApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0f1a; color: #c8d6e5; line-height: 1.6; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { color: #f5a623; font-size: 1.75rem; margin-bottom: 0.25rem; }
+    .subtitle { color: #6b7c93; font-size: 0.9rem; margin-bottom: 2rem; }
+    .subtitle a { color: #f5a623; text-decoration: none; }
+    h2 { color: #e2e8f0; font-size: 1.2rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+    p { color: #8896a6; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; color: #f5a623; font-size: 0.85em; font-family: 'SF Mono', Menlo, monospace; }
+    pre { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 0.75rem 1rem; margin: 0.75rem 0; overflow-x: auto; font-size: 0.8rem; color: #c8d6e5; }
+    img { width: 100%; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 0.5rem 0 0.25rem; display: block; }
+    .caption { color: #6b7c93; font-size: 0.8rem; font-style: italic; margin-bottom: 1.5rem; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    th { text-align: left; color: #8896a6; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 500; }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c8d6e5; vertical-align: top; }
+    .note { background: rgba(245,166,35,0.08); border-left: 3px solid #f5a623; padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.85rem; color: #c8d6e5; border-radius: 0 6px 6px 0; }
+    .meta { font-size: 0.85rem; color: #4a5568; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem; text-align: center; }
+    .meta a { color: #f5a623; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Supabase Migration CI</h1>
+    <p class="subtitle">PR #84 · Refs <a href="https://github.com/trtincher/DNDApp/issues/84">#84</a> · Infrastructure — no runtime surface</p>
+
+    <h2>Pipeline Overview</h2>
+    <p>Until now, every Supabase SQL migration in <code>supabase/migrations/</code> has been applied by hand in the dashboard — fragile, easy to forget, no PR-time validation. This PR adds a GitHub Actions workflow that validates on PR and applies on merge, with a secret-gate so the workflow can land before credentials are wired up.</p>
+    <img src="ss-01-pipeline.png" alt="CI pipeline diagram">
+    <p class="caption">ss-01 — Three triggers, two jobs, secret-gated. Dry-run on PRs, apply on merge or manual dispatch.</p>
+
+    <h2>Workflow Source</h2>
+    <p>The full <code>.github/workflows/supabase-migrate.yml</code> (133 lines). Every real step is guarded by <code>if: steps.check.outputs.has_secrets == 'true'</code>.</p>
+    <img src="ss-02-workflow-yaml.png" alt="Workflow YAML rendered with syntax highlighting">
+    <p class="caption">ss-02 — Full workflow source.</p>
+
+    <h2>Expected First Run</h2>
+    <p>What the GH Actions UI will display on the first real apply, once secrets are configured. The outstanding <code>20260405000000_campaigns.sql</code> from #83 will apply as the first migration the pipeline ever runs against prod.</p>
+    <img src="ss-03-expected-run.png" alt="Expected workflow run showing campaigns migration applied">
+    <p class="caption">ss-03 — Mock of the first apply. <code>migration list</code> output shows the pending campaigns migration, then <code>db push</code> applies it with the full set of DDL from the .sql file.</p>
+
+    <h2>Secret-Gate Behavior</h2>
+    <p>This is the deliberate design choice that makes this PR safe to merge immediately: if secrets aren't set yet, every substantive step is skipped and the job exits green with a warning annotation. No blocking red X on the merge queue, just a visible reminder.</p>
+    <img src="ss-04-secret-gate.png" alt="Workflow run with secrets unset, skipping all steps">
+    <p class="caption">ss-04 — What the run looks like on the first push after merge, if secrets haven't been set. Green overall, loud warning.</p>
+
+    <h2>What This PR Ships</h2>
+    <table>
+      <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>.github/workflows/supabase-migrate.yml</code></td><td>New workflow — dry-run job on PR, apply job on push-to-main and workflow_dispatch</td></tr>
+        <tr><td><code>supabase/README.md</code></td><td>Flow docs, secret setup, migration history table</td></tr>
+        <tr><td><code>.env.example</code></td><td>Documents the three CI-only secrets and where to get them</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Rollout Order</h2>
+    <ol style="color: #8896a6; font-size: 0.88rem; padding-left: 1.25rem; line-height: 1.8;">
+      <li>Merge this PR. The workflow lands, but nothing runs against prod yet (secret-gate skips everything).</li>
+      <li>Set three repo secrets via <code>gh secret set</code>: <code>SUPABASE_ACCESS_TOKEN</code>, <code>SUPABASE_DB_PASSWORD</code>, <code>SUPABASE_PROJECT_REF</code>.</li>
+      <li>Trigger the first real run: <code>gh workflow run "Supabase migrations"</code>. This applies the outstanding <code>20260405000000_campaigns.sql</code> from #83.</li>
+      <li>Verify: <code>campaigns</code> table exists in Supabase, RLS policies active, smoke test cross-device sync.</li>
+      <li>From then on, any migration added to <code>supabase/migrations/</code> applies automatically on merge.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Why not Option A (Supabase native GitHub integration)?</strong> It's faster to set up (~10 min) but the config lives in the Supabase dashboard, invisible to anyone reading the repo. Option B (this PR) costs an extra 20 minutes and buys: explicit workflow source, PR-time dry-run validation, GitHub-native audit trail, and loud failure modes if something drifts.
+    </div>
+
+    <div class="meta">
+      <a href="https://github.com/trtincher/DNDApp/pull/84">View PR on GitHub</a> · Generated with Claude Code
+    </div>
+  </div>
+</body>
+</html>
