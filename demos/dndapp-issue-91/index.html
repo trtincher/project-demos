@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>DNDApp — Issue #91 Demo</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px}</style>
+</head>
+<body>
+<h1>Issue #91 — Encounter Card Controls Layout Fix</h1>
+<p>Fixes overlapping reorder arrows and trash icon on campaign detail encounter cards.</p>
+<h2>Before</h2>
+<div class="card before"><p>Trash icon was <code>absolute right-2 top-2</code> while reorder arrows sat in a flex column — they overlapped and tap targets were too small (&lt;32px).</p></div>
+<h2>After</h2>
+<div class="card after"><p>All three controls [↑][↓][🗑] are grouped in a single <code>flex-col</code> at the top-right. Each button is <code>min-h-[32px] min-w-[32px]</code>. No overlap. Clean, accessible layout.</p></div>
+<h2>Files Changed</h2>
+<ul><li><code>src/components/campaign/EncounterListEditor.tsx</code> — Removed absolute trash button; merged into the reorder control group.</li></ul>
+</body></html>
