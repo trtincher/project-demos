@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>DNDApp — Issue #93 Demo</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px}</style>
+</head>
+<body>
+<h1>Issue #93 — Live Difficulty in Encounter Card</h1>
+<p>Encounter card header now shows live-calculated difficulty instead of the stale template value after enemy scaling.</p>
+<h2>Before</h2>
+<div class="card before"><p>Card header showed <code>encounter.difficulty</code> (e.g. "Medium") from the template. After scaling enemies up or down in the Scale panel, the Scale panel showed the correct new difficulty (e.g. "Deadly") but the card header remained stale.</p></div>
+<h2>After</h2>
+<div class="card after"><p>The card header computes difficulty live using <code>calculateDifficulty()</code> from the engine, passing <code>campEnc.enemyOverrides</code> when present. Falls back to template difficulty when no overrides exist. Both displays are always in sync.</p></div>
+<h2>Files Changed</h2>
+<ul><li><code>src/components/campaign/EncounterListEditor.tsx</code> — Added <code>getEffectiveDifficulty()</code> helper; replaced static <code>encounter.difficulty</code> with the live-calculated value.</li></ul>
+</body></html>
