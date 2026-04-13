@@ -8,8 +8,10 @@
 <p>Fixes overlapping reorder arrows and trash icon on campaign detail encounter cards.</p>
 <h2>After</h2>
 <div class="card after">
-  <p>All three controls [↑][↓][🗑] are grouped in a single <code>flex-col</code> at the top-right. Each button is <code>min-h-[32px] min-w-[32px]</code>. No overlap. Clean, accessible layout.</p>
+  <p>Controls grouped in a single <code>flex-col</code> at the top-right: 🗑 trash first, then ↑ then ↓. Each button is <code>min-h-[32px] min-w-[32px]</code>. No overlap.</p>
   <img src="./screenshots/91-encounter-controls.png" alt="Campaign detail with grouped encounter controls">
+  <p style="margin-top:12px;font-size:0.85em;color:#94a3b8">Zoomed — control order (🗑 above ↑ ↓):</p>
+  <img src="./screenshots/91-card-detail.png" alt="Close-up of encounter card showing trash icon above reorder arrows" style="max-width:600px">
 </div>
 <h2>Files Changed</h2>
 <ul><li><code>src/components/campaign/EncounterListEditor.tsx</code> — Removed absolute trash button; merged into the reorder control group.</li></ul>
