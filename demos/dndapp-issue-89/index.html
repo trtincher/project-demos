@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>DNDApp — Issue #89 Demo</title>
-<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px;font-size:0.9em}</style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DNDApp — Issue #89 Demo</title>
+<style>body{font-family:sans-serif;max-width:900px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px;font-size:0.9em}img{max-width:100%;border-radius:8px;margin:10px 0;border:1px solid #334155}.note{background:#1e3a5f;border:1px solid #3b82f6;border-radius:6px;padding:12px;font-size:0.9em;color:#93c5fd;margin:12px 0}</style>
 </head>
 <body>
 <h1>Issue #89 — Nav Header: Avatar Dropdown</h1>
 <p>Consolidates the nav header so all buttons fit on one row and Settings/Sign Out live in an avatar dropdown.</p>
 <h2>Before</h2>
 <div class="card before">
-  <p>7+ nav buttons wrapping to two rows. <code>⚙ Settings</code> button inline in the nav. User avatar and "Sign out" text appear inline with nav buttons — displaced and cluttered.</p>
+  <p>7+ nav buttons wrapping to two rows. <code>⚙ Settings</code> button inline in the nav.</p>
+  <img src="./screenshots/89-before-nav.png" alt="Before: cluttered nav with Settings button">
 </div>
 <h2>After</h2>
 <div class="card after">
-  <p>Nav buttons fit cleanly on one row. <strong>Settings</strong> link removed from nav. User avatar is anchored to the far right. Clicking the avatar opens a dropdown with <strong>Settings</strong> and <strong>Sign out</strong>. Clean, minimal header.</p>
+  <p>Nav buttons fit cleanly on one row. <strong>Settings</strong> removed from nav. Avatar anchored to the far right opens a dropdown with <strong>Settings</strong> and <strong>Sign out</strong>.</p>
+  <img src="./screenshots/89-nav-clean.png" alt="After: clean compact nav without Settings clutter">
 </div>
+<div class="note">The avatar dropdown (initials button → Settings / Sign out) is only visible when authenticated — it does not render in the unauthenticated demo environment.</div>
 <h2>Files Changed</h2>
 <ul>
-  <li><code>src/components/auth/UserMenu.tsx</code> — Avatar now toggles a dropdown with Settings link and Sign Out button. Outside-click closes it.</li>
+  <li><code>src/components/auth/UserMenu.tsx</code> — Avatar becomes a toggle button; dropdown renders Settings link + Sign Out. Outside-click closes.</li>
   <li><code>src/pages/RosterPage.tsx</code> — Removed standalone <code>⚙ Settings</code> link from nav.</li>
 </ul>
 </body></html>

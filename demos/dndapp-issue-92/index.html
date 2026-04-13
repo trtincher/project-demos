@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>DNDApp — Issue #92 Demo</title>
-<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px}</style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DNDApp — Issue #92 Demo</title>
+<style>body{font-family:sans-serif;max-width:900px;margin:40px auto;padding:0 20px;background:#0f172a;color:#cbd5e1}h1{color:#fbbf24}h2{color:#94a3b8;border-bottom:1px solid #334155;padding-bottom:8px}.card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;margin:12px 0}.before{border-left:3px solid #ef4444}.after{border-left:3px solid #22c55e}code{background:#0f172a;padding:2px 6px;border-radius:4px}img{max-width:100%;border-radius:8px;margin:10px 0;border:1px solid #334155}</style>
 </head>
 <body>
 <h1>Issue #92 — Clickable Campaign Card</h1>
 <p>Campaign list cards are now fully clickable. View and Delete buttons replaced with a clickable card and a trash icon.</p>
-<h2>Before</h2>
-<div class="card before"><p>Each card had a <code>View</code> button and a <code>Delete</code> text button at the bottom. Required an extra click to navigate.</p></div>
 <h2>After</h2>
-<div class="card after"><p>The entire card is a <code>&lt;Link&gt;</code> that navigates to the campaign detail page. The <code>View</code> button is removed. A 🗑 trash icon sits in the top-right corner; clicking it shows a confirmation dialog before deleting. The click event is stopped from bubbling to prevent navigation.</p></div>
+<div class="card after">
+  <p>The entire card is a <code>&lt;Link&gt;</code> that navigates to the campaign detail page. <code>View</code> button removed. 🗑 trash icon in the top-right corner with <code>e.preventDefault()</code> to stop card navigation.</p>
+  <img src="./screenshots/92-campaign-card.png" alt="Campaign list with clickable cards and trash icons">
+</div>
 <h2>Files Changed</h2>
 <ul><li><code>src/pages/dm/CampaignListPage.tsx</code> — Card wrapper changed from <code>&lt;div&gt;</code> to <code>&lt;Link&gt;</code>. Delete button → trash icon SVG with <code>e.preventDefault()</code>.</li></ul>
 </body></html>
